@@ -61,3 +61,32 @@ Debugging a system that spans a host process and a virtualized guest is difficul
 
 **Reasoning:**
 When things go wrong in a VM, they fail silently or cryptically. Providing a guide on how to peek inside the black box (the VM) and the complex network stack is essential for keeping contributors from giving up when they hit a bug.
+
+## 4. Additional Documentation Concepts
+
+I have also evaluated several other potential documentation improvements. Here is my analysis on how to best integrate them:
+
+### A. Demo Folder / Quickstart Script
+**Proposal:** A `demo/` folder or script to get a working example immediately.
+**Recommendation:** Integrate into `examples/` and referenced in `CONTRIBUTING.md`.
+**Reasoning:** The current `examples/` folder exists but might not be "one-click" enough. A dedicated script that runs a cool demo (e.g., "fetch a secret and write to a file") without needing complex setup (other than `npm install`) would be a huge confidence booster. It validates the environment works before diving into code.
+
+### B. Current Limitations
+**Proposal:** A section explicitly listing what the system *cannot* do.
+**Recommendation:** Add to `README.md` or `docs/ARCHITECTURE.md`.
+**Reasoning:** Managing expectations is crucial. If a user expects full Docker compatibility or raw socket access, they might be disappointed. Explicitly listing limitations (e.g., "No raw TCP/UDP egress," "Filesystem performance overhead," "Single-threaded guest supervisor") saves time for everyone and helps define the project's scope.
+
+### C. Pareto Features ("High Impact, Low Effort")
+**Proposal:** A list of features that would skyrocket interest with minimal effort.
+**Recommendation:** Add as a "Help Wanted / Roadmap" section in `CONTRIBUTING.md` or a pinned GitHub Issue.
+**Reasoning:** New contributors often ask "What can I do?". A curated list of high-impact tasks (e.g., "Add support for X language in guest," "Implement Y VFS optimization") gamifies contribution and directs energy where it matters most.
+
+### D. `DRAGONS.md` (Complexity Warnings)
+**Proposal:** A warning label for the most complex parts of the codebase.
+**Recommendation:** Merge into `docs/ARCHITECTURE.md` or keep as commented warnings in code.
+**Reasoning:** While a standalone `DRAGONS.md` is fun, it might get out of date. It is better to highlight these areas in `ARCHITECTURE.md` (e.g., "The Network Stack is custom-written in JS; modify with caution") and ensure the code itself has extensive comments in those "dragon" areas (like `host/src/network-stack.ts`).
+
+### E. Fun Experiments
+**Proposal:** Fun things to try to get familiar with the project.
+**Recommendation:** Add to `CONTRIBUTING.md` under "Getting Started" or a `docs/TUTORIAL.md`.
+**Reasoning:** Learning by doing is best. Suggested experiments like "Try to break out of the sandbox," "Write a script that talks to a local server," or "Mount a huge directory and benchmark it" give users a structured way to explore the capabilities and boundaries of Gondolin.
