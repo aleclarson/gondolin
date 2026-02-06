@@ -9,6 +9,17 @@ Gondolin runs a lightweight Linux VM controlled by a Node.js process.
 *   **Guest:** The VM environment where untrusted code runs.
 *   **Isolation:** The Guest has NO network access by default. All HTTP/HTTPS traffic is intercepted and proxied by the Host.
 
+## Guest Environment
+
+You have access to a Linux Micro VM (Alpine). Beyond standard BusyBox utilities, the following toolset is pre-installed:
+
+*   **Languages:** Python 3.12, Node.js (with npm/npx).
+*   **Package Management:** `uv` (use this for fast Python pkg installs), `npm`.
+*   **Network:** `curl`, `wget`, `wcurl`, `nc` (netcat), `nslookup`, `whois`.
+*   **Utilities:** `tree` (use this to explore file structure), `lsof`, `pstree`, `bc`, `xxd`.
+
+> **Note:** `git` is **not** present in `/usr/bin`, so plan accordingly.
+
 ## API Reference
 
 ### 1. Creating a VM
