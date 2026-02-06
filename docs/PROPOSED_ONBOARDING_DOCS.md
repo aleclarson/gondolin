@@ -1,6 +1,6 @@
 # Proposed Onboarding Documentation for Gondolin
 
-To significantly improve the onboarding experience for new contributors to this Gondolin fork, I propose creating the following eight high-impact documents. These documents address the current gaps in documentation regarding contribution workflows, system architecture, and debugging.
+To significantly improve the onboarding experience for new contributors to this Gondolin fork, I propose creating the following nine high-impact documents. These documents address the current gaps in documentation regarding contribution workflows, system architecture, debugging, and AI integration.
 
 Given that this is a fork not actively cooperating with the upstream creator, these documents are designed to be "snapshots" of knowledge to help new maintainers get up to speed quickly, without the expectation of constant upstream synchronization. The strategy favors **many focused documents** over fewer monolithic ones to improve discoverability and reduce update friction.
 
@@ -85,7 +85,22 @@ Prevents users from wasting time trying to implement impossible features.
 
 **Value / Cost Rating:** **75/100** (Prevents frustration; very low cost).
 
-## 6. `docs/ROADMAP.md`
+## 6. `AGENTS.md` (Updated)
+
+**Purpose:**
+A comprehensive yet compact usage guide optimized for AI agents (and humans) to understand how to integrate with the library programmatically.
+
+**Proposed Contents:**
+-   **API Reference:** Concise signatures for `VM.create`, `createHttpHooks`, etc.
+-   **Patterns:** Correct way to inject secrets, mount VFS, and execute commands.
+-   **Context:** Explains the "why" behind the API (e.g., why `httpHooks` are separate).
+
+**Reasoning:**
+Agents need context to write correct code. The existing `AGENTS.md` focused on *contributing* to the repo, not *using* the library.
+
+**Value / Cost Rating:** **85/100** (Crucial for the target audience; low cost to draft).
+
+## 7. `docs/ROADMAP.md`
 
 **Purpose:**
 Highlights "Pareto Features" – high-impact changes that would significantly boost the project's value with minimal effort.
@@ -100,7 +115,7 @@ Gamifies contribution and directs energy to where it matters most for this fork.
 
 **Value / Cost Rating:** **70/100** (Good for direction; requires triage effort).
 
-## 7. `docs/DRAGONS.md`
+## 8. `docs/DRAGONS.md`
 
 **Purpose:**
 A "Here Be Dragons" warning for the most complex, fragile, or nuanced parts of the codebase.
@@ -115,7 +130,7 @@ Prevents "chesterton's fence" removals and warns experienced devs where to tread
 
 **Value / Cost Rating:** **65/100** (Crucial for deep dives; niche audience).
 
-## 8. `docs/EXPERIMENTS.md`
+## 9. `docs/EXPERIMENTS.md`
 
 **Purpose:**
 A list of fun, educational tasks to help developers learn the system by doing.
