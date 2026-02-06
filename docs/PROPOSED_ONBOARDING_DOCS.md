@@ -85,7 +85,7 @@ Prevents users from wasting time trying to implement impossible features.
 
 **Value / Cost Rating:** **75/100** (Prevents frustration; very low cost).
 
-## 6. `AGENTS.md` (Updated)
+## 6. `docs/INTEGRATION.md`
 
 **Purpose:**
 A comprehensive yet compact usage guide optimized for AI agents (and humans) to understand how to integrate with the library programmatically.
@@ -96,7 +96,7 @@ A comprehensive yet compact usage guide optimized for AI agents (and humans) to 
 -   **Context:** Explains the "why" behind the API (e.g., why `httpHooks` are separate).
 
 **Reasoning:**
-Agents need context to write correct code. The existing `AGENTS.md` focused on *contributing* to the repo, not *using* the library.
+Agents need context to write correct code. The existing `AGENTS.md` is reserved for repository-specific agent instructions (contribution workflow), whereas this document focuses on *consumption* of the library.
 
 **Value / Cost Rating:** **85/100** (Crucial for the target audience; low cost to draft).
 

@@ -1,87 +1,55 @@
-# Agent Integration Guide
+# Agent Notes
 
-This document is a comprehensive, compact usage guide for AI agents and developers integrating with Gondolin. It focuses on how to use the library to create, control, and secure micro-VMs.
+Start by reading `README.md` in the repo root for the current status, repo layout, and next steps.
 
-## Core Concepts
+## Repo Layout
 
-Gondolin runs a lightweight Linux VM controlled by a Node.js process.
-*   **Host:** Your Node.js application.
-*   **Guest:** The VM environment where untrusted code runs.
-*   **Isolation:** The Guest has NO network access by default. All HTTP/HTTPS traffic is intercepted and proxied by the Host.
+- `guest/` — Zig-based `sandboxd` daemon and Alpine initramfs build (cross-compiled, targets aarch64/x86_64 Linux)
+- `host/` — TypeScript host controller, networking stack, VFS, and CLI (`pnpm` workspace)
+- `scripts/` — Build tooling (`run-parallel` etc.)
+- `docs/` — Additional documentation (custom images, etc.)
+- `examples/` — Usage examples
 
-## API Reference
+## Building & Testing
 
-### 1. Creating a VM
-
-```ts
-import { VM, createHttpHooks, MemoryProvider, RealFSProvider } from "@earendil-works/gondolin";
-
-// Define Network Policy
-const { httpHooks, env } = createHttpHooks({
-  // Only allow specific domains
-  allowedHosts: ["api.openai.com", "github.com"],
-  // Inject secrets ONLY for specific hosts (Guest never sees the raw value)
-  secrets: {
-    OPENAI_API_KEY: {
-      hosts: ["api.openai.com"],
-      value: process.env.OPENAI_API_KEY,
-    },
-  },
-});
-
-// Initialize VM
-const vm = await VM.create({
-  // Network hooks for interception
-  httpHooks,
-  // Environment variables for the guest (e.g. placeholder secrets)
-  env,
-  // Virtual Filesystem Configuration
-  vfs: {
-    mounts: {
-      // Ephemeral memory filesystem at /workspace
-      "/workspace": new MemoryProvider(),
-      // Read-only mount of a host directory
-      "/data": new ReadonlyProvider(new RealFSProvider("./host-data")),
-    },
-  },
-});
+```bash
+make build      # Build everything (guest + host)
+make check      # Lint + typecheck (guest + host)
+make test       # Run all tests
 ```
 
-### 2. Executing Commands
-
-Commands run inside the Guest. Standard streams are returned.
-
-```ts
-const result = await vm.exec("ls -la /workspace");
-if (result.exitCode !== 0) {
-  console.error("Command failed:", result.stderr);
-} else {
-  console.log("Output:", result.stdout);
-}
-
-// Streaming execution (for long-running processes)
-await vm.exec("npm install", [], {
-  onStdout: (chunk) => process.stdout.write(chunk),
-  onStderr: (chunk) => process.stderr.write(chunk),
-});
+Host tests run with `tsx --test` (Node.js test runner):
+```bash
+cd host && pnpm test              # All host tests
+cd host && pnpm exec tsx --test test/specific.test.ts  # Single test
 ```
 
-### 3. Cleanup
+Guest builds use Zig (`zig build`). The image builder is in TypeScript (`host/src/build-alpine.ts`).
 
-Always close the VM to kill the QEMU process.
+## Key Conventions
 
-```ts
-await vm.close();
-```
+- **TypeScript:** The host package uses `tsx` for running TypeScript directly. Tests use Node's built-in test runner (`node:test`).
+- **Zig version:** 0.15.2 (see `guest/build.zig.zon`).
+- **Package manager:** pnpm (workspace root + `host/` package).
 
-## Best Practices
+### Field comments (TS interfaces/types + Zig structs)
 
-*   **Secret Safety:** NEVER pass raw secrets via `env` or `exec`. Use the `secrets` option in `createHttpHooks`. The Guest receives a placeholder (e.g., `$OPENAI_API_KEY`), and the Host injects the real value at the network layer.
-*   **Filesystem:** Prefer `MemoryProvider` for temporary work. Use `RealFSProvider` sparingly and consider `ReadonlyProvider` wrapper for safety.
-*   **Networking:** The Guest cannot use raw TCP/UDP. Do not try to `ping` or open database connections unless they are HTTP-based.
-*   **Concurrency:** The VM is single-threaded. Avoid running massive parallel builds inside one VM.
+Add field comments when the meaning isn’t obvious, especially for **exported/public types**, **host↔guest/protocol/config/on-disk formats**, and anything with **units/encoding**, **sentinel values**, or **invariants**. Skip comments for truly self-explanatory internal fields.
 
-## Internal Architecture (For Debugging)
+Use `/** … */` above TS properties and `/// …` above Zig fields. Keep comments **one line**, **noun-phrase style**, **no period**, and include units in backticks (e.g. `ms`, `bytes`). Put longer rationale on the struct/type doc comment, not per-field.
 
-*   **Virtio-Serial:** Used for all Host<->Guest communication (exec, fs-rpc).
-*   **Network:** The Host implements a JS-based TCP/IP stack. It terminates Guest TCP connections and proxies them via Node's `fetch`.
+## Working with Tests
+
+- Tests are in `host/test/*.test.ts` with shared helpers in `host/test/helpers/`.
+- VM integration tests require hardware acceleration (macOS HVF or Linux KVM). Use `shouldSkipVmTests()` from `host/test/helpers/vm-fixture.ts` to gate them.
+- Unit tests that don't need a VM should not import VM fixtures. Keep them fast and isolated.
+- The test timeout in CI is 120s for VM tests. If adding slow tests, be mindful of this limit.
+
+## CI Notes
+
+- CI runs on GitHub Actions (Ubuntu). Guest is cross-compiled for both aarch64 and x86_64.
+- KVM is enabled on CI runners for VM tests.
+
+## Important: Preserving Working Tree Changes
+
+**Do NOT run `git checkout` or `git restore` on files without explicit user approval.** If you notice uncommitted changes that seem unrelated to your task, ask the user before discarding them. Previous sessions have had agents accidentally reset intentional working-tree changes.
